@@ -1,0 +1,44 @@
+version: '2'
+services:
+  nginx:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.0.0
+    environment:
+      - "cluster.name=elasticsearch"
+      - "bootstrap.memory_lock=true"
+      - "xpack.security.enabled=false"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+  app:
+    image: jetty
+    links:
+      - elasticsearch
+    depends_on:
+      - "elasticsearch"
+      - "nginx"
+    volumes:
+      - ./webapps:/var/lib/jetty/webapps
+    ports:
+      - "8080"
+    environment:
+      - VIRTUAL_HOST=${GERMINAL_HOSTNAME}
+      - GERMINAL_ELASTIC_ADDR=elasticsearch
+volumes:
+  esdata1:
+    driver: local
+
+networks:
+  esnet:
