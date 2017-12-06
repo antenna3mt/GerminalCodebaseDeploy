@@ -10,8 +10,9 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.0.0
     environment:
       - "cluster.name=elasticsearch"
-      - "bootstrap.memory_lock=true"
+      - bootstrap.memory_lock=true
       - "xpack.security.enabled=false"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
@@ -35,7 +36,7 @@ services:
       - "8080"
     environment:
       - VIRTUAL_HOST=${GERMINAL_HOSTNAME}
-      - GERMINAL_ELASTIC_ADDR=elasticsearch
+      - GERMINAL_ELASTIC_ADDR=elasticsearch:9200
 volumes:
   esdata1:
     driver: local
